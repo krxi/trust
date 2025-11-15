@@ -1,2 +1,5 @@
 Watching this video series: [link](https://www.youtube.com/watch?v=bzja9fQWzdA&list=PLqbS7AVVErFivDY3iKAQk3_VAm8SXwt1X), and digging deep by hands-on practice.
+
 Also im not using ai for practical things ( like write code, or skipping and abusing thinking proccess ), only using for theoritically thing like what is Tcp doing at handshake proccess ( before then i try to understand with searching on google ).
+
+Date format: M/D/Y

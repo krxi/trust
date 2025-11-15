@@ -1,6 +1,6 @@
 use std::io;
 use tun_tap::*;
-use etherparse::{Ipv4HeaderSlice, TcpHeader};
+use etherparse::{Ipv4HeaderSlice, TcpHeaderSlice};
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
 
@@ -36,28 +36,29 @@ fn main() -> io::Result<()> {
 
         // IP LAYER
         match Ipv4HeaderSlice::from_slice(&buf[4..bytes]) {
-            Ok(p) => {
-                let p_len = p.slice().len(); // protocol len
+            Ok(iph) => {
+                
                
                 // At the first, I used payload_len()
                 // I misunderstood to get length of protocol header size why its have Result type ? 
                 // because this function returns the payload size with checking max header size of ipv4 datagram
                 // so i changed with p.slice().len() its returns the real header size
 
-                let src = p.source_addr();
-                let dst = p.destination_addr();
-                let proto = p.protocol();
-                let ttl = p.ttl();
+                let p_len = iph.slice().len(); // protocol len
+                let src = iph.source_addr();
+                let dst = iph.destination_addr();
                 
-                if proto.0 != 0x06 {
+                if iph.protocol() != 0x06 {
                     // not tcp
                     continue;
                 }
 
-                match TcpHeader::from_slice(&buf[4 + p_len..]) { //Skipping the header of IPV4 Datagram Header
-                    Ok(h) => {
-                        connections.entry(Quad { src: (src,h.0.source_port), dst: (dst,h.0.destination_port) })
-                        println!("{} -> {}, {}b of tcp to port {}",src,dst,h.0.header_len(),h.0.destination_port)
+                match TcpHeaderSlice::from_slice(&buf[4 + p_len..]) { //Skipping the header of IPV4 Datagram Header
+                    Ok(tcph) => {
+                        let data = 4 + p_len + tcph.slice().len();
+
+                        //connections.entry(Quad { src: (src,h.0.source_port), dst: (dst,h.0.destination_port) })
+                        println!("{} -> {}, {}b of tcp to port {}",src,dst,tcph.slice().len(),tcph.destination_port())
                     }
                     Err(e) => {
                         println!("Ignoring weird tcp packet: {:?}",e)

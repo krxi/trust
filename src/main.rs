@@ -6,7 +6,7 @@ use std::net::Ipv4Addr;
 
 mod tcp;
 
-#[derive(Clone,Copy,Eq,PartialEq,Hash,Debug)] // I explained in my notes
+#[derive(Clone,Copy,Eq,PartialEq,Hash,Debug)] // I explained each one in my notes
 struct Quad { // Its structure of each Connection.
     // Ipv4,Port
     src: (Ipv4Addr,u16), // I used Ipv4Addr function because the library gives that type

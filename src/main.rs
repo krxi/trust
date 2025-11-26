@@ -22,7 +22,8 @@ fn main() -> io::Result<()> {
 
     let mut nic = tun_tap::Iface::new("tun0", tun_tap::Mode::Tun)?; //we created normal virtual network instance
     
-    let mut buf = [0u8; 1504]; // window size
+    let mut buf = [0u8; 1504]; // MTU (The maximum transmission )
+    // if the payload bigger than 1500 (4 for the tun tap flags), The payload divides into parts which not exceeded to 1500.
 
     loop {
         let bytes = nic.recv(&mut buf[..])?; // the func needed with mut buf |--| pub fn  recv(&self, buf: &mut [u8]) -> Result<usize> |--|
@@ -62,7 +63,7 @@ fn main() -> io::Result<()> {
                                 dst: (dst, tcph.destination_port()),
                             })
                             .or_default()
-                            .on_packet(&mut nic,iph, tcph, &buf[data..bytes]);
+                            .on_packet(&mut nic,iph, tcph, &buf[data..bytes])?;
                     }
                     Err(e) => {
                         println!("Ignoring weird tcp packet: {:?}", e)

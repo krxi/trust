@@ -33,7 +33,7 @@ impl State {
                 let mut tcp_packet = TcpHeader::new(tcph.source_port(), tcph.destination_port(), 0, 0);
                 tcp_packet.ack = true;
                 tcp_packet.syn = true;
-                let mut ipv4_packet = Ipv4Header::new(tcp_packet.header_len(), 64, TCP, iph.destination(),iph.source());
+                let mut ipv4_packet = Ipv4Header::new(tcp_packet.header_len_u16(), 64, TCP, iph.destination(),iph.source());
 
             },
             State::SynRcvd => todo!(),

@@ -1,6 +1,7 @@
 use std::net::Ipv4Addr;
 
 use etherparse::{Ipv4Header, Ipv4HeaderSlice, TcpHeader, TcpHeaderSlice, ip_number::TCP};
+use tun_tap::Iface;
 
 pub enum State {
     Closed,
@@ -17,8 +18,8 @@ impl Default for State {
 }
 
 impl State {
-    pub fn on_packet<'a>(&mut self,iph: Ipv4HeaderSlice<'a>, tcph: TcpHeaderSlice, data: &'a [u8])
-    //Lifetime Annotation 'a 
+    pub fn on_packet<'a>(&mut self,nic: &mut Iface,iph: Ipv4HeaderSlice<'a>, tcph: TcpHeaderSlice, data: &'a [u8])
+    // Lifetime Annotation 'a 
     // The datas which have 'a annotation, means they are same lifetime for avoid dangling pointer and data corruption
     {
         match self {
@@ -34,6 +35,7 @@ impl State {
                 tcp_packet.ack = true;
                 tcp_packet.syn = true;
                 let mut ipv4_packet = Ipv4Header::new(tcp_packet.header_len_u16(), 64, TCP, iph.destination(),iph.source());
+
 
             },
             State::SynRcvd => todo!(),

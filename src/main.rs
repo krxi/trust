@@ -20,8 +20,8 @@ fn main() -> io::Result<()> {
     let a = 5;
     let b = 4;
 
-    let nic = tun_tap::Iface::new("tun0", tun_tap::Mode::Tun)?; //we created normal virtual network instance
-
+    let mut nic = tun_tap::Iface::new("tun0", tun_tap::Mode::Tun)?; //we created normal virtual network instance
+    
     let mut buf = [0u8; 1504]; // window size
 
     loop {
@@ -62,7 +62,7 @@ fn main() -> io::Result<()> {
                                 dst: (dst, tcph.destination_port()),
                             })
                             .or_default()
-                            .on_packet(iph, tcph, &buf[data..bytes]);
+                            .on_packet(&mut nic,iph, tcph, &buf[data..bytes]);
                     }
                     Err(e) => {
                         println!("Ignoring weird tcp packet: {:?}", e)

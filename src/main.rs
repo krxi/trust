@@ -1,8 +1,7 @@
-use etherparse::{Ipv4HeaderSlice, TcpHeader, TcpHeaderSlice};
+use etherparse::{Ipv4HeaderSlice, TcpHeaderSlice};
 use std::collections::HashMap;
 use std::io;
 use std::net::Ipv4Addr;
-use tun_tap::*;
 
 mod tcp;
 
@@ -17,9 +16,6 @@ struct Quad {
 fn main() -> io::Result<()> {
     let mut connections: HashMap<Quad, tcp::State> = HashMap::new();
 
-    let a = 5;
-    let b = 4;
-
     let mut nic = tun_tap::Iface::new("tun0", tun_tap::Mode::Tun)?; //we created normal virtual network instance
     
     let mut buf = [0u8; 1504]; // MTU (The maximum transmission )
@@ -28,13 +24,13 @@ fn main() -> io::Result<()> {
     loop {
         let bytes = nic.recv(&mut buf[..])?; // the func needed with mut buf |--| pub fn  recv(&self, buf: &mut [u8]) -> Result<usize> |--|
 
-        let flags = i16::from_be_bytes([buf[0], buf[1]]); // Takes the first 2 bytes in bytes array and converts to integer ( decimal )
+        let _flags = i16::from_be_bytes([buf[0], buf[1]]); // Takes the first 2 bytes in bytes array and converts to integer ( decimal )
         let eth_proto = i16::from_be_bytes([buf[2], buf[3]]); // Takes the second 2 bytes in bytes array and converts to integer ( decimal )
         if eth_proto != 0x0800 {
             // not ipv4
             continue;
         }
-
+       
         // IP LAYER
         match Ipv4HeaderSlice::from_slice(&buf[4..bytes]) {
             Ok(iph) => {
@@ -86,5 +82,4 @@ fn main() -> io::Result<()> {
         // the program write every 0 and its not efficient
     }
 
-    Ok(())
 }

@@ -39,12 +39,14 @@ impl State {
                     return Ok(0);
                 }
 
-
                 //need to start establish a connection
                 let mut tcp_packet =
-                    TcpHeader::new(tcph.destination_port(), tcph.source_port(), 2, 64);
+                    TcpHeader::new(tcph.destination_port(), tcph.source_port(), 0, 64);
+                    // Out seq number is 0 for now. TO-DO 
+                
                 tcp_packet.ack = true;
                 tcp_packet.syn = true;
+                tcp_packet.acknowledgment_number = tcph.sequence_number() + 1; // Because we got SYN, so we need to increase by 1.
 
                 if let Ok(ipv4_header) = etherparse::Ipv4Header::new(
                     tcp_packet.header_len_u16(),

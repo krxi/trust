@@ -14,7 +14,7 @@ struct Quad {
 }
 
 fn main() -> io::Result<()> {
-    let mut connections: HashMap<Quad, tcp::State> = HashMap::new();
+    let mut connections: HashMap<Quad, tcp::Connection> = HashMap::new();
 
     let mut nic = tun_tap::Iface::new("tun0", tun_tap::Mode::Tun)?; //we created normal virtual network instance
     

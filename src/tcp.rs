@@ -4,7 +4,7 @@ use etherparse::{Ipv4HeaderSlice, TcpHeader, TcpHeaderSlice, ip_number::TCP};
 use tun_tap::Iface;
 
 #[allow(dead_code)]
-pub enum State {
+enum State {
     Closed,
     Listen,
     SynRcvd,
@@ -12,13 +12,51 @@ pub enum State {
     Estab,
 }
 
-impl Default for State {
+pub struct Connection {
+    state: State,
+}
+
+#[doc = r"State of the Send Sequence Space (rfc793 S3.2 F4)
+```
+           1         2          3          4
+      ----------|----------|----------|----------
+             SND.UNA    SND.NXT    SND.UNA
+                                  +SND.WND
+
+1 - old sequence numbers which have been acknowledged
+2 - sequence numbers of unacknowledged data
+3 - sequence numbers allowed for new data transmission
+4 - future sequence numbers which are not yet allowed
+```"]
+
+
+struct SendSequence {
+    // send unacknowledged
+    una: usize,
+    // send next
+    nxt: usize,
+    // send window
+    wnd: usize,
+    //send urgent point (idk what is it)
+    up: bool, 
+    // segment sequence number used for last window update
+    wl1: usize,
+    // segment acknowledgment number used for last window update
+    wl2: usize,
+    // initial send sequence number
+    iss: usize
+
+}
+
+impl Default for Connection {
     fn default() -> Self {
-        State::Listen
+        Connection {
+            state: State::Listen,
+        }
     }
 }
 
-impl State {
+impl Connection {
     pub fn on_packet<'a>(
         &mut self,
         nic: &mut Iface,
@@ -30,8 +68,8 @@ impl State {
     // The datas which have 'a annotation, means they are same lifetime for avoid dangling pointer and data corruption
     {
         let mut unwritten_buffer = [0u8; 1500]; // TO UNDERSTAND
-
-        match self {
+        
+        match self.state {
             State::Closed => return Ok(0),
             State::Listen => {
                 if !tcph.syn() {
